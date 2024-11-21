@@ -17,6 +17,10 @@ from vllm.entrypoints.openai.serving_engine import (LoRAModulePath,
 from vllm.entrypoints.openai.tool_parsers import ToolParserManager
 from vllm.utils import FlexibleArgumentParser
 
+# Variable to hold arguments passed to the vllm cli.
+# It is initiated in the validate_parsed_serve_args function.
+vllm_server_args: argparse.Namespace | None = None
+
 
 class LoRAParserAction(argparse.Action):
 
@@ -226,6 +230,13 @@ def make_arg_parser(parser: FlexibleArgumentParser) -> FlexibleArgumentParser:
         " into OpenAI API format, the name register in this plugin can be used "
         "in --tool-call-parser.")
 
+    parser.add_argument(
+        "--forbid-extra-fields",
+        action="store_true",
+        default=False,
+        help="Raise an error if extra fields are present in the payload"
+        " of the requests.")
+
     parser = AsyncEngineArgs.add_cli_args(parser)
 
     parser.add_argument('--max-log-len',
@@ -254,6 +265,10 @@ def validate_parsed_serve_args(args: argparse.Namespace):
     """Quick checks for model serve args that raise prior to loading."""
     if hasattr(args, "subparser") and args.subparser != "serve":
         return
+
+    # set the global vllm_server_args
+    global vllm_server_args
+    vllm_server_args = args
 
     # Ensure that the chat template is valid; raises if it likely isn't
     validate_chat_template(args.chat_template)

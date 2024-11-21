@@ -6,9 +6,11 @@ from typing import Any, Dict, List, Literal, Optional, Union
 
 import torch
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic.config import ExtraValues
 from typing_extensions import Annotated
 
 from vllm.entrypoints.chat_utils import ChatCompletionMessageParam
+from vllm.entrypoints.openai.cli_args import vllm_server_args
 from vllm.logger import init_logger
 from vllm.pooling_params import PoolingParams
 from vllm.sampling_params import (BeamSearchParams, GuidedDecodingParams,
@@ -37,9 +39,15 @@ assert _LONG_INFO.min == _MOCK_LONG_INFO.min
 assert _LONG_INFO.max == _MOCK_LONG_INFO.max
 
 
+def get_extra_field_policy() -> ExtraValues:
+    if vllm_server_args and vllm_server_args.forbid_extra_fields:
+        return "forbid"
+    return "allow"
+
+
 class OpenAIBaseModel(BaseModel):
     # OpenAI API does allow extra fields
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra=get_extra_field_policy())
 
     @model_validator(mode="before")
     @classmethod
