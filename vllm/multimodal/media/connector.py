@@ -88,6 +88,7 @@ class MediaConnector:
         *,
         allowed_local_media_path: str = "",
         allowed_media_domains: list[str] | None = None,
+        forbid_media_private_networks_access: bool = False,
     ) -> None:
         """
         Args:
@@ -99,6 +100,9 @@ class MediaConnector:
             allowed_local_media_path: A local directory to load media files from.
             allowed_media_domains: If set, only media URLs that belong to this
                                    domain can be used for multi-modal inputs.
+            forbid_media_private_networks_access: If set, only media URLs that
+                                   belong to a public domain can be used for
+                                   multimodal inputs.
         """
         super().__init__()
 
@@ -127,6 +131,7 @@ class MediaConnector:
         if allowed_media_domains is None:
             allowed_media_domains = []
         self.allowed_media_domains = allowed_media_domains
+        self.forbid_media_private_networks_access = forbid_media_private_networks_access
 
         # Media download cache (opt-in via VLLM_MEDIA_CACHE)
         self._media_cache_dir: str | None = None

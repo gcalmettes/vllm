@@ -86,7 +86,9 @@ async def test_fetch_image_base64(
         allowed_media_domains=[
             "www.bogotobogo.com",
             "github.com",
-        ]
+        ],
+        # Private domain restriction should not apply to data URLs.
+        forbid_media_private_networks_access=True,
     )
     url_image = url_images[raw_image_url]
 
